@@ -12,4 +12,7 @@
     <string name="barcode_success">Barcode read successfully</string>
     <string name="barcode_failure">No barcode captured</string>
     <string name="barcode_error">"Error reading barcode: %1$s"</string>
+    <string name="under_18">"Under 18. No admission"</string>
+    <string name="under_21">"Under 21. Blue wristband."</string>
+    <string name="over_21">"Over 21. Green wristband."</string>
 </resources>

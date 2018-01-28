@@ -18,8 +18,6 @@ package com.google.android.gms.samples.vision.barcodereader;
 import android.content.Context;
 import android.support.annotation.UiThread;
 
-import com.google.android.gms.samples.vision.barcodereader.ui.camera.GraphicOverlay;
-import com.google.android.gms.vision.Detector;
 import com.google.android.gms.vision.Tracker;
 import com.google.android.gms.vision.barcode.Barcode;
 
@@ -30,8 +28,6 @@ import com.google.android.gms.vision.barcode.Barcode;
  * goes away.
  */
 public class BarcodeGraphicTracker extends Tracker<Barcode> {
-    private GraphicOverlay<BarcodeGraphic> mOverlay;
-    private BarcodeGraphic mGraphic;
 
     private BarcodeUpdateListener mBarcodeUpdateListener;
 
@@ -44,10 +40,7 @@ public class BarcodeGraphicTracker extends Tracker<Barcode> {
         void onBarcodeDetected(Barcode barcode);
     }
 
-    BarcodeGraphicTracker(GraphicOverlay<BarcodeGraphic> mOverlay, BarcodeGraphic mGraphic,
-                          Context context) {
-        this.mOverlay = mOverlay;
-        this.mGraphic = mGraphic;
+    BarcodeGraphicTracker(Context context) {
         if (context instanceof BarcodeUpdateListener) {
             this.mBarcodeUpdateListener = (BarcodeUpdateListener) context;
         } else {
@@ -60,35 +53,7 @@ public class BarcodeGraphicTracker extends Tracker<Barcode> {
      */
     @Override
     public void onNewItem(int id, Barcode item) {
-        mGraphic.setId(id);
         mBarcodeUpdateListener.onBarcodeDetected(item);
     }
 
-    /**
-     * Update the position/characteristics of the item within the overlay.
-     */
-    @Override
-    public void onUpdate(Detector.Detections<Barcode> detectionResults, Barcode item) {
-        mOverlay.add(mGraphic);
-        mGraphic.updateItem(item);
-    }
-
-    /**
-     * Hide the graphic when the corresponding object was not detected.  This can happen for
-     * intermediate frames temporarily, for example if the object was momentarily blocked from
-     * view.
-     */
-    @Override
-    public void onMissing(Detector.Detections<Barcode> detectionResults) {
-        mOverlay.remove(mGraphic);
-    }
-
-    /**
-     * Called when the item is assumed to be gone for good. Remove the graphic annotation from
-     * the overlay.
-     */
-    @Override
-    public void onDone() {
-        mOverlay.remove(mGraphic);
-    }
 }

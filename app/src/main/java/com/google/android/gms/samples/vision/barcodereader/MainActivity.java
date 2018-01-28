@@ -16,9 +16,9 @@
 
 package com.google.android.gms.samples.vision.barcodereader;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.app.Activity;
 import android.util.Log;
 import android.view.View;
 import android.widget.CompoundButton;
@@ -26,6 +26,8 @@ import android.widget.TextView;
 
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.vision.barcode.Barcode;
+
+import java.util.Calendar;
 
 /**
  * Main activity demonstrating how to pass extra parameters to an activity that
@@ -37,7 +39,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private CompoundButton autoFocus;
     private CompoundButton useFlash;
     private TextView statusMessage;
-    private TextView barcodeValue;
+    private TextView nameField;
+    private TextView ageField;
 
     private static final int RC_BARCODE_CAPTURE = 9001;
     private static final String TAG = "BarcodeMain";
@@ -47,8 +50,9 @@ public class MainActivity extends Activity implements View.OnClickListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        statusMessage = (TextView)findViewById(R.id.status_message);
-        barcodeValue = (TextView)findViewById(R.id.barcode_value);
+        statusMessage = (TextView) findViewById(R.id.status_message);
+        nameField = (TextView) findViewById(R.id.name);
+        ageField = (TextView) findViewById(R.id.age);
 
         autoFocus = (CompoundButton) findViewById(R.id.auto_focus);
         useFlash = (CompoundButton) findViewById(R.id.use_flash);
@@ -102,8 +106,21 @@ public class MainActivity extends Activity implements View.OnClickListener {
             if (resultCode == CommonStatusCodes.SUCCESS) {
                 if (data != null) {
                     Barcode barcode = data.getParcelableExtra(BarcodeCaptureActivity.BarcodeObject);
+                    Barcode.DriverLicense license = barcode.driverLicense;
                     statusMessage.setText(R.string.barcode_success);
-                    barcodeValue.setText(barcode.displayValue);
+                    nameField.setText(license.firstName + " " + license.middleName + " " + license.lastName);
+                    Calendar measureDate = parseDate(license.birthDate);
+                    Calendar today = Calendar.getInstance();
+                    measureDate.add(Calendar.YEAR, 18);
+                    if (today.before(measureDate)) {
+                        ageField.setText(R.string.under_18);
+                    }
+                    measureDate.add(Calendar.YEAR, 3);
+                    if (today.before(measureDate)) {
+                        ageField.setText(R.string.under_21);
+                    } else {
+                        ageField.setText(R.string.over_21);
+                    }
                     Log.d(TAG, "Barcode read: " + barcode.displayValue);
                 } else {
                     statusMessage.setText(R.string.barcode_failure);
@@ -113,9 +130,19 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 statusMessage.setText(String.format(getString(R.string.barcode_error),
                         CommonStatusCodes.getStatusCodeString(resultCode)));
             }
-        }
-        else {
+        } else {
             super.onActivityResult(requestCode, resultCode, data);
         }
+    }
+
+    private Calendar parseDate(String birthDate) {
+        int month = Integer.parseInt(birthDate.substring(0, 2));
+        int day = Integer.parseInt(birthDate.substring(2, 4));
+        int year = Integer.parseInt(birthDate.substring(4));
+        return new Calendar.Builder()
+                .set(Calendar.MONTH, month)
+                .set(Calendar.DAY_OF_MONTH, day)
+                .set(Calendar.YEAR, year)
+                .build();
     }
 }
